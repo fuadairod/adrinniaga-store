@@ -1,0 +1,115 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Inventory Transactions{% endblock %}
+
+{% block breadcrumb %}
+    <span class="text-white opacity-75">Inventory</span> 
+    <span class="mx-2 text-muted">/</span> 
+    <span class="text-white fw-medium">Stock Movement Logs</span>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h3 class="fw-bold text-white mb-1">Inventory Ledger</h3>
+            <p class="text-light opacity-75 small mb-0">Tracking all stock adjustments and product movements.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-light btn-sm px-3 border-secondary-subtle">
+                <i class="bi bi-funnel me-1"></i> Filter Logs
+            </button>
+            <button class="btn btn-primary btn-sm px-4 fw-bold">
+                <i class="bi bi-file-earmark-arrow-down me-1"></i> Export CSV
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card p-3" style="background: #0f172a; border: 1px solid #1f2937;">
+                <div class="text-white opacity-75 small fw-bold text-uppercase">Total Movements</div>
+                <div class="h4 text-white mb-0 mt-1">{{ transactions|length }} <small class="text-light opacity-50 fs-6">Entries</small></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm overflow-hidden" style="background: #111827; border: 1px solid #1f2937 !important;">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead class="bg-black text-white opacity-50 small">
+                    <tr>
+                        <th class="ps-4 py-3" style="width: 120px;">Ref. ID</th>
+                        <th class="py-3">Product Details</th>
+                        <th class="py-3 text-center">Stock Adjustment</th>
+                        <th class="py-3">Date & Time</th>
+                        <th class="pe-4 py-3 text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    {% for t in transactions %}
+                    <tr style="border-bottom: 1px solid #1f2937;">
+                        <td class="ps-4">
+                            <span class="text-primary font-monospace small">#{{ t.id }}</span>
+                        </td>
+                        <td>
+                            <div class="text-white fw-bold mb-0">{{ t.product.name }}</div>
+                            <div class="text-white opacity-75 x-small">Product ID: {{ t.product.id }}</div>
+                        </td>
+                        <td class="text-center">
+                            <div class="d-inline-flex align-items-center bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1 rounded-pill">
+                                <i class="bi bi-arrow-up-right me-2 small"></i>
+                                <span class="fw-bold text-white">+{{ t.added_stock }} Units</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="text-white small">{{ t.created_at.strftime("%d %b, %Y") }}</div>
+                            <div class="text-white opacity-75 x-small">{{ t.created_at.strftime("%I:%M %p") }}</div>
+                        </td>
+                        <td class="pe-4 text-end">
+                            <button class="btn btn-outline-light btn-sm p-1 border-0" title="View Details">
+                                <i class="bi bi-chevron-right text-light"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="text-white opacity-50 py-4">
+                                <i class="bi bi-clipboard-x display-5 mb-3 d-block"></i>
+                                <p>No inventory movements recorded yet.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .x-small { font-size: 0.75rem; }
+    
+    .table-dark {
+        --bs-table-bg: transparent;
+        --bs-table-hover-bg: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Brighter Text for Table Cells */
+    .table-dark tbody td {
+        color: #e2e8f0; 
+    }
+
+    /* Action Buttons */
+    .btn-outline-light {
+        color: #f8fafc;
+        border-color: #4b5563;
+    }
+    
+    .btn-outline-light:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+</style>
+{% endblock %}

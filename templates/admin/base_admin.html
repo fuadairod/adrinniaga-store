@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Portal{% endblock %} | Adrinniaga</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --top-nav-height: 64px;
+            --brand-color: #2563eb; 
+            --bg-dark-deep: #030712; /* Pure Black-Blue */
+            --bg-dark-surface: #0f172a; /* Slightly lighter for cards */
+            --sidebar-dark: #020617;
+            --border-color: #1e293b;
+            --text-muted: #94a3b8;
+        }
+
+        body { 
+            background-color: var(--bg-dark-deep);
+            color: #f8fafc;
+            font-family: 'Inter', -apple-system, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* --- Sidebar Navigation --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: var(--sidebar-dark);
+            border-right: 1px solid var(--border-color);
+            z-index: 1040;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            height: var(--top-nav-height);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-nav {
+            padding: 1.25rem 0.75rem;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .nav-link i { margin-right: 12px; font-size: 1.1rem; }
+        .nav-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .nav-link.active { 
+            color: #fff; 
+            background: var(--brand-color); 
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); 
+        }
+
+        /* --- Main Content Area --- */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: margin 0.3s ease;
+        }
+
+        .top-navbar {
+            height: var(--top-nav-height);
+            background: var(--bg-dark-deep); /* Changed from #fff */
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+        }
+
+        .content-body {
+            padding: 2rem;
+            flex-grow: 1;
+            background: var(--bg-dark-deep);
+        }
+
+        footer {
+            padding: 1.5rem;
+            background: var(--bg-dark-deep); /* Changed from #fff */
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* --- UI Elements Overrides --- */
+        .breadcrumb-item + .breadcrumb-item::before {
+            color: var(--text-muted);
+        }
+        
+        .btn-light {
+            background: var(--bg-dark-surface);
+            border: 1px solid var(--border-color);
+            color: #fff;
+        }
+
+        .btn-light:hover {
+            background: #1e293b;
+            color: #fff;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 991.98px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .main-wrapper { margin-left: 0; }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.8);
+                z-index: 1035;
+            }
+            .sidebar-overlay.show { display: block; }
+        }
+
+        .alert { 
+            background: var(--bg-dark-surface); 
+            border: 1px solid var(--border-color);
+            color: #fff;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h5 class="text-white mb-0 fw-bold"><i class="bi bi-shield-lock-fill me-2 text-primary"></i>Admin Panel</h5>
+    </div>
+    
+    <nav class="sidebar-nav">
+        <a href="{{ url_for('admin_orders') }}" class="nav-link {% if 'orders' in request.endpoint %}active{% endif %}">
+            <i class="bi bi-cart3"></i> Orders
+        </a>
+        <a href="{{ url_for('admin_products') }}" class="nav-link {% if 'products' in request.endpoint %}active{% endif %}">
+            <i class="bi bi-box-seam"></i> Products
+        </a>
+        <a href="{{ url_for('admin_add_product') }}" class="nav-link {% if 'add_product' in request.endpoint %}active{% endif %}">
+            <i class="bi bi-plus-circle"></i> Add Product
+        </a>
+        <a href="{{ url_for('admin_inventory') }}" class="nav-link {% if 'inventory' in request.endpoint %}active{% endif %}">
+            <i class="bi bi-bar-chart-steps"></i> Inventory
+        </a>
+        <a href="{{ url_for('admin_manage_admins') }}" class="nav-link {% if 'manage_admins' in request.endpoint or 'change_password' in request.endpoint %}active{% endif %}">
+            <i class="bi bi-people"></i> Manage Admins
+        </a>
+        
+        <hr class="border-secondary opacity-25 my-4">
+        
+        <a href="{{ url_for('store') }}" class="nav-link">
+            <i class="bi bi-arrow-left-square"></i> Back to Shop
+        </a>
+    </nav>
+</aside>
+
+<div class="main-wrapper">
+    <header class="top-navbar">
+        <button class="btn btn-light d-lg-none me-3" id="sidebarToggle">
+            <i class="bi bi-list"></i>
+        </button>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item text-muted">Admin</li>
+                <li class="breadcrumb-item active text-white" aria-current="page">{% block breadcrumb %}Dashboard{% endblock %}</li>
+            </ol>
+        </nav>
+        <div class="ms-auto d-flex align-items-center">
+            <span class="badge bg-dark border border-secondary text-secondary p-2 fw-normal">
+                <i class="bi bi-calendar3 me-1"></i> {{ datetime_malaysia.strftime('%d %b %Y') }}
+            </span>
+        </div>
+    </header>
+
+    <main class="content-body">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, msg in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill me-2 text-primary"></i>
+                    {{ msg }}
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="container-fluid p-0">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer>
+        <div class="container-fluid d-flex justify-content-between">
+            <span>&copy; {{ datetime_malaysia.year }} <strong class="text-white">Adrinniaga</strong>.</span>
+            <span class="d-none d-md-inline opacity-50">Enterprise Dashboard v2.0</span>
+        </div>
+    </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const toggle = document.getElementById('sidebarToggle');
+
+    const toggleSidebar = () => {
+        sidebar.classList.toggle('show');
+        overlay.classList.toggle('show');
+    };
+
+    toggle.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,184 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Order #{{ order.order_no }}{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ url_for('admin_orders') }}" class="text-decoration-none text-white opacity-75 d-print-none">Orders</a> 
+    <span class="mx-2 text-white opacity-50 d-print-none">/</span> 
+    <span class="text-white fw-medium d-print-none">Order_Details</span>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="d-none d-print-block mb-5">
+        <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 20px;">
+            <div>
+                <h1 style="margin:0; font-weight: bold;">ADRINSTORE</h1>
+                <p style="margin:0;">Kuala Lumpur, Malaysia</p>
+            </div>
+            <div style="text-align: right;">
+                <h2 style="margin:0; text-transform: uppercase;">Invoice</h2>
+                <p style="margin:0;">#{{ order.order_no }}</p>
+                <p style="margin:0;">Date: {{ order.created_at.strftime('%d %b %Y') }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3 d-print-none">
+        <div>
+            <h3 class="fw-bold text-white mb-1">Invoice #{{ order.order_no }}</h3>
+            <p class="text-white opacity-75 small mb-0">Order ID: <span class="font-monospace text-primary">0x{{ order.id }}</span></p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if order.receipt %}
+            <a href="{{ url_for('static', filename='uploads/receipts/' + order.receipt) }}" target="_blank" class="btn btn-outline-light btn-sm px-3 border-secondary-subtle">
+                <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> View Receipt
+            </a>
+            {% endif %}
+            <form action="{{ url_for('admin_send_invoice', oid=order.id) }}" method="POST" class="d-inline">
+                <button type="submit" class="btn btn-outline-info btn-sm px-3 fw-bold">
+                    <i class="bi bi-envelope-at me-1"></i> Send Invoice
+                </button>
+            </form>
+            <button onclick="window.print();" class="btn btn-primary btn-sm px-4 fw-bold shadow">
+                <i class="bi bi-printer me-1"></i> Print Invoice
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm" style="background: #111827; border: 1px solid #1f2937 !important;">
+                <div class="card-header bg-transparent border-bottom border-secondary-subtle py-3 d-print-none">
+                    <h6 class="text-white mb-0 fw-bold"><i class="bi bi-person-circle me-2 text-primary"></i>Customer Information</h6>
+                </div>
+                <div class="card-body p-4 text-white">
+                    <div class="mb-4">
+                        <label class="opacity-50 small fw-bold text-uppercase mb-1 d-block">Full Name</label>
+                        <div class="fs-5 fw-semibold text-white">{{ order.customer_name }}</div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="opacity-50 small fw-bold text-uppercase mb-1 d-block">Email Address</label>
+                        <div class="fs-6 text-white">{{ order.email }}</div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="opacity-50 small fw-bold text-uppercase mb-1 d-block">Contact Number</label>
+                        <div class="fs-6 font-monospace text-white">{{ order.phone }}</div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="opacity-50 small fw-bold text-uppercase mb-1 d-block">Shipping Address</label>
+                        <div class="small lh-base" style="color: #cbd5e1 !important;">
+                            {{ order.address }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm overflow-hidden" style="background: #111827; border: 1px solid #1f2937 !important;">
+                <div class="card-header bg-transparent border-bottom border-secondary-subtle py-3 d-print-none">
+                    <h6 class="text-white mb-0 fw-bold"><i class="bi bi-bag-check me-2 text-primary"></i>Order Items</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle mb-0">
+                        <thead class="bg-black text-white opacity-50 small">
+                            <tr>
+                                <th class="ps-4 py-3">Product Description</th>
+                                <th class="py-3 text-center">Qty</th>
+                                <th class="py-3">Unit Price</th>
+                                <th class="pe-4 py-3 text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="border-top-0">
+                            {% for item in items %}
+                            <tr style="border-bottom: 1px solid #1f2937;">
+                                <td class="ps-4 py-4">
+                                    <span class="text-white fw-bold d-block">{{ item.product_name }}</span>
+                                    <span class="text-white opacity-50 x-small">SKU: ITEM-{{ item.id }}</span>
+                                </td>
+                                <td class="text-center text-white">
+                                    <span class="badge bg-secondary bg-opacity-25 text-white px-3 py-2 border border-secondary border-opacity-25 d-print-none">{{ item.qty }}</span>
+                                    <span class="d-none d-print-block">{{ item.qty }}</span>
+                                </td>
+                                <td class="text-white opacity-75">RM {{ "{:,.2f}".format(item.price) }}</td>
+                                <td class="pe-4 text-end text-primary fw-bold">RM {{ "{:,.2f}".format(item.qty * item.price) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-black bg-opacity-50">
+                                <td colspan="3" class="ps-4 py-3 text-white fw-bold text-end text-uppercase small">Order Total Amount</td>
+                                <td class="pe-4 py-3 text-end text-primary fs-5 fw-black">
+                                    RM {{ "{:,.2f}".format(total_amount) }}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card mt-4 border-0 shadow-sm d-print-none" style="background: #111827; border: 1px solid #1f2937 !important;">
+                <div class="card-body p-4">
+                    <form method="POST" class="row align-items-end g-3">
+                        <div class="col-md-8">
+                            <label class="form-label text-white opacity-75 small fw-bold">UPDATE ORDER STATUS</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-black border-secondary"><i class="bi bi-truck text-primary"></i></span>
+                                <select name="status" class="form-select erp-input">
+                                    <option value="pending" {% if order.status=='pending' %}selected{% endif %}>🕒 Payment Pending</option>
+                                    <option value="processing" {% if order.status=='processing' %}selected{% endif %}>📦 Processing / Packing</option>
+                                    <option value="completed" {% if order.status=='completed' %}selected{% endif %}>✅ Delivered</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Update Status</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 1. SCREEN UI - YOUR ORIGINAL DARK THEME */
+    .text-white { color: #ffffff !important; }
+    .erp-input { background-color: #000 !important; border: 1px solid #374151 !important; color: #ffffff !important; }
+    .table-dark { --bs-table-bg: transparent; --bs-table-hover-bg: rgba(255, 255, 255, 0.03); }
+    .x-small { font-size: 0.75rem; }
+    .fw-black { font-weight: 900; }
+
+    /* 2. PRINT LOGIC - ONLY TRIGGERS WHEN PRINTING */
+    @media print {
+        @page { size: A4; margin: 1.5cm; }
+        body { background: white !important; color: black !important; font-family: Arial, sans-serif !important; }
+        
+        /* Hide UI clutter */
+        .sidebar, .top-navbar, .breadcrumb, .d-print-none, .btn, form, select { display: none !important; }
+        
+        /* Reset containers */
+        .main-content { margin: 0 !important; padding: 0 !important; }
+        .card { 
+            background: white !important; 
+            border: none !important; 
+            color: black !important; 
+            box-shadow: none !important; 
+        }
+
+        /* Adjust Table for Print */
+        .table-dark { color: black !important; background: white !important; width: 100% !important; border: 1px solid #eee !important; }
+        .table-dark thead { background: #f8f9fa !important; color: black !important; border-bottom: 2px solid black !important; }
+        .table-dark tbody tr { border-bottom: 1px solid #eee !important; }
+        .text-white, .text-primary, .opacity-50, .opacity-75 { color: black !important; opacity: 1 !important; }
+        
+        /* Keep Total visible */
+        .bg-black { background: #f8f9fa !important; border-top: 2px solid black !important; }
+        
+        /* Column Layout for Print */
+        .row { display: flex !important; flex-wrap: nowrap !important; }
+        .col-lg-4 { width: 35% !important; }
+        .col-lg-8 { width: 65% !important; }
+    }
+</style>
+{% endblock %}

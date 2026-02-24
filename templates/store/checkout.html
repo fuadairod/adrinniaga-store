@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block title %}Checkout - Adrinniaga{% endblock %}
+
+{% block extra_head %}
+<style>
+    .checkout-container {
+        background: var(--surface-dark);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    }
+
+    .form-section {
+        padding: 30px;
+    }
+
+    .summary-section {
+        background: rgba(255, 255, 255, 0.02);
+        padding: 30px;
+        border-left: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .form-label {
+        color: #aaa;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        background-color: #0f111a !important;
+        border: 1px solid #333 !important;
+        color: #fff !important;
+        border-radius: 10px;
+        padding: 12px;
+    }
+
+    .form-control:focus {
+        border-color: var(--accent-color) !important;
+        box-shadow: 0 0 0 0.25rem rgba(0, 210, 255, 0.15);
+    }
+
+    /* Custom Radio Styling */
+    .payment-option {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .payment-option:hover {
+        background: rgba(255, 255, 255, 0.07);
+    }
+
+    .form-check-input:checked + .form-check-label {
+        color: var(--accent-color);
+    }
+
+    .qr-card {
+        background: #fff; /* QR needs white background to be scannable */
+        padding: 20px;
+        border-radius: 15px;
+        display: inline-block;
+    }
+
+    .total-display {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--accent-color);
+    }
+
+    .btn-place-order {
+        background: var(--accent-color);
+        color: #000;
+        font-weight: 700;
+        border: none;
+        padding: 15px;
+        border-radius: 12px;
+        width: 100%;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: 0.3s;
+    }
+
+    .btn-place-order:hover {
+        background: #00b8e6;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 210, 255, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-12 text-center mb-4">
+        <h2 class="fw-bold">Complete Your <span style="color: var(--accent-color);">Order</span></h2>
+        <p class="text-muted">Secure checkout and instant processing</p>
+    </div>
+
+    <div class="col-lg-11 mx-auto">
+        <form method="POST" enctype="multipart/form-data">
+            <div class="checkout-container">
+                <div class="row g-0">
+                    
+                    <div class="col-md-7 form-section">
+                        <h4 class="mb-4 text-white"><i class="fa-solid fa-user-tag me-2 text-primary"></i> Shipping Details</h4>
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" name="name" placeholder="Enter your full name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" name="email" class="form-control" placeholder="name@example.com" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone Number</label>
+                                <input type="text" class="form-control" name="phone" placeholder="+60 123456789" required>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Shipping Address</label>
+                                <textarea class="form-control" name="address" rows="4" placeholder="Full street address, postal code, and city" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5 summary-section">
+                        <h4 class="mb-4 text-white"><i class="fa-solid fa-credit-card me-2 text-primary"></i> Payment</h4>
+
+                        <div class="payment-option">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" 
+                                       id="qr_option" value="QR" checked onclick="togglePayment()">
+                                <label class="form-check-label fw-bold" for="qr_option">
+                                    QR Code Payment (Manual)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="payment-option opacity-50">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="payment_method" 
+                                       id="fpx_option" value="FPX" onclick="togglePayment()">
+                                <label class="form-check-label fw-bold" for="fpx_option">
+                                    FPX Online Banking
+                                    <span class="badge bg-dark ms-2">Coming Soon</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="qr_section" class="mt-4 animate-fade-in">
+                            <div class="text-center p-3 border border-secondary rounded-3 border-dashed">
+                                <p class="small text-muted mb-3">Scan the code below to pay</p>
+                                <div class="qr-card mb-3">
+                                    <img src="{{ url_for('static', filename='images/qr_code.png') }}" 
+                                         class="img-fluid" style="max-width:180px;">
+                                </div>
+                                
+                                <div class="text-start mt-3">
+                                    <label class="form-label text-white">Upload Payment Receipt</label>
+                                    <input type="file" name="receipt" class="form-control form-control-sm" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="fpx_section" class="mt-4" style="display:none;">
+                            <div class="alert alert-info border-0 shadow-sm" style="background: rgba(13, 202, 240, 0.1); color: #0dcaf0;">
+                                <i class="fa-solid fa-circle-info me-2"></i> FPX integration with Razorpay will be available in the next update.
+                            </div>
+                        </div>
+
+                        <div class="mt-5">
+                            <div class="d-flex justify-content-between align-items-end mb-3">
+                                <span class="text-muted">Grand Total:</span>
+                                <span class="total-display">RM {{ '%.2f'|format(total) }}</span>
+                            </div>
+                            <button type="submit" class="btn btn-place-order">
+                                Confirm & Place Order
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function togglePayment() {
+    const qr = document.getElementById("qr_option");
+    const qrSection = document.getElementById("qr_section");
+    const fpxSection = document.getElementById("fpx_section");
+
+    if (qr.checked) {
+        qrSection.style.display = "block";
+        fpxSection.style.display = "none";
+    } else {
+        qrSection.style.display = "none";
+        fpxSection.style.display = "block";
+    }
+}
+</script>
+{% endblock %}

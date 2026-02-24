@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}Cart - Adrinniaga{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Force Global Dark Mode Text for this page */
+    .cart-container, .cart-container td, .cart-container th, .cart-container div {
+        color: #ffffff;
+    }
+
+    .cart-container { padding-bottom: 120px; }
+
+    /* Card Styling */
+    .cart-item-card {
+        background: var(--surface-dark);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        transition: transform 0.2s;
+    }
+
+    /* Desktop Table - Hidden on Mobile */
+    @media (min-width: 769px) {
+        .mobile-cart-list { display: none; }
+        .desktop-cart-table { display: block; }
+    }
+
+    /* Mobile List - Hidden on Desktop */
+    @media (max-width: 768px) {
+        .desktop-cart-table { display: none; }
+        .mobile-cart-list { display: block; }
+        .cart-container { padding-top: 10px; }
+    }
+
+    /* Desktop Table Styling Refinement */
+    .table { 
+        color: #ffffff !important; 
+        --bs-table-bg: transparent;
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .table thead th {
+        color: var(--accent-color) !important;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        border-bottom: 1px solid rgba(0, 210, 255, 0.2);
+        padding: 15px;
+    }
+
+    /* Input Fields */
+    .qty-input-box {
+        background: #0a0c12 !important;
+        border: 1px solid #444 !important;
+        color: var(--accent-color) !important;
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    /* Mobile Item Styling */
+    .m-item-title { font-size: 0.95rem; font-weight: 600; color: #fff !important; margin-bottom: 5px; }
+    .m-item-price { color: var(--accent-color) !important; font-weight: 700; font-size: 1rem; }
+    
+    .m-item-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* --- REFINED CHECKOUT BUTTON (Matches Product Detail Page) --- */
+    .btn-checkout {
+        background: var(--accent-color);
+        color: #000 !important;
+        font-weight: 700;
+        border-radius: 12px;
+        padding: 14px 30px;
+        border: none;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        display: inline-block;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .btn-checkout:hover {
+        background: #00b8e6; /* Matches detail page hover color */
+        transform: translateY(-3px); /* Matches lift effect */
+        box-shadow: 0 10px 20px rgba(0, 210, 255, 0.3); /* Matches glow effect */
+        color: #000 !important;
+    }
+
+    /* Mobile Sticky Footer Shadow Adjustment */
+    @media (max-width: 768px) {
+        .cart-summary-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #12161d;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.8);
+            z-index: 1050;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        /* Make mobile button slightly more compact but keep the effect */
+        .cart-summary-footer .btn-checkout {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+    }
+
+    .btn-update-sm {
+        background: var(--accent-color);
+        border: none;
+        color: #000 !important;
+        padding: 4px 12px;
+        font-size: 0.75rem;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container cart-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold text-white mb-0">Shopping Cart <span class="text-muted small">({{ cart|length if cart else 0 }})</span></h4>
+        {% if cart %}
+        <a href="{{ url_for('clear_cart') }}" class="text-danger text-decoration-none small">
+            <i class="fa-solid fa-trash-can me-1"></i> Empty Cart
+        </a>
+        {% endif %}
+    </div>
+
+    {% if cart %}
+    <div class="desktop-cart-table card cart-item-card p-4">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Product Details</th>
+                    <th class="text-center">Quantity</th>
+                    <th class="text-end">Unit Price</th>
+                    <th class="text-end">Subtotal</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for key, item in cart.items() %}
+                <tr>
+                    <td>
+                        <div class="fw-bold text-white">{{ item.name }}</div>
+                        <div class="small text-muted">ID: {{ key }}</div>
+                    </td>
+                    <td style="width: 160px;">
+                        <form method="POST" action="{{ url_for('update_cart', pid=key) }}" class="d-flex gap-2 justify-content-center">
+                            <input type="number" name="qty" value="{{ item.qty }}" min="1" class="form-control form-control-sm qty-input-box" style="width: 60px;">
+                            <button type="submit" class="btn btn-sm btn-outline-info"><i class="fa-solid fa-sync"></i></button>
+                        </form>
+                    </td>
+                    <td class="text-end text-white">RM{{ "%.2f"|format(item.price) }}</td>
+                    <td class="text-end fw-bold" style="color: var(--accent-color);">RM{{ "%.2f"|format(item.qty * item.price) }}</td>
+                    <td class="text-center">
+                        <a href="{{ url_for('remove_from_cart', pid=key) }}" class="text-danger opacity-75"><i class="fa-solid fa-circle-xmark fa-lg"></i></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="d-flex justify-content-between align-items-end mt-4 pt-3 border-top border-secondary">
+            <a href="{{ url_for('store') }}" class="text-muted text-decoration-none small hover-white">
+                <i class="fa-solid fa-arrow-left me-1"></i> Continue Shopping
+            </a>
+            <div class="text-end">
+                <div class="text-muted small text-uppercase mb-1">Estimated Total</div>
+                <div class="h2 fw-bold text-white mb-3">RM{{ "%.2f"|format(total) }}</div>
+                <a href="{{ url_for('checkout') }}" class="btn btn-checkout px-5">Proceed to Checkout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-cart-list">
+        {% for key, item in cart.items() %}
+        <div class="cart-item-card p-3 mb-3">
+            <div class="m-item-header">
+                <div class="m-item-info">
+                    <div class="m-item-title">{{ item.name }}</div>
+                    <div class="m-item-price">RM{{ "%.2f"|format(item.price) }}</div>
+                </div>
+                <a href="{{ url_for('remove_from_cart', pid=key) }}" class="text-danger opacity-50"><i class="fa-solid fa-xmark"></i></a>
+            </div>
+            
+            <div class="m-item-actions mt-3">
+                <div class="small text-muted">Total: <span style="color: var(--accent-color);">RM{{ "%.2f"|format(item.qty * item.price) }}</span></div>
+                <form method="POST" action="{{ url_for('update_cart', pid=key) }}" class="d-flex align-items-center gap-2">
+                    <input type="number" name="qty" value="{{ item.qty }}" min="1" class="qty-input-box px-1" style="width: 50px; height: 30px; font-size: 0.8rem;">
+                    <button type="submit" class="btn-update-sm">UPDATE</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="cart-summary-footer">
+            <div class="text-start">
+                <div class="text-muted" style="font-size: 0.65rem; text-transform: uppercase;">Total</div>
+                <div class="fw-bold" style="font-size: 1.2rem; color: var(--accent-color);">RM{{ "%.2f"|format(total) }}</div>
+            </div>
+            <a href="{{ url_for('checkout') }}" class="btn btn-checkout">Checkout</a>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-4 opacity-25">
+            <i class="fa-solid fa-cart-arrow-down fa-5x text-white"></i>
+        </div>
+        <h4 class="text-white fw-bold">Your cart is empty</h4>
+        <p class="text-muted mb-4">Looks like you haven't added anything yet.</p>
+        <a href="{{ url_for('store') }}" class="btn btn-outline-info rounded-pill px-4">Go Shopping</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

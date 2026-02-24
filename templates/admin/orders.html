@@ -1,0 +1,150 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Orders Management{% endblock %}
+
+{% block breadcrumb %}
+    <span class="text-white opacity-75">Commerce</span> 
+    <span class="mx-2 text-muted">/</span> 
+    <span class="text-white fw-medium">Order_Registry</span>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h3 class="fw-bold text-white mb-1">Customer Orders</h3>
+            <p class="text-white opacity-75 small mb-0">Overview of all transactions and fulfillment statuses.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-black border-secondary text-white-50"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control erp-search" placeholder="Find Order No...">
+            </div>
+            <button class="btn btn-primary btn-sm px-4 fw-bold">
+                <i class="bi bi-download me-1"></i> Export
+            </button>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm overflow-hidden" style="background: #111827; border: 1px solid #1f2937 !important;">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead class="bg-black text-white small">
+                    <tr style="border-bottom: 2px solid #1f2937;">
+                        <th class="ps-4 py-3">Reference</th>
+                        <th class="py-3">Customer Profile</th>
+                        <th class="py-3">Contact</th>
+                        <th class="py-3 text-center">Fulfillment Status</th>
+                        <th class="py-3">Timestamp</th>
+                        <th class="pe-4 py-3 text-end">Management</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    {% for order in orders %}
+                    <tr style="border-bottom: 1px solid #1f2937;">
+                        <td class="ps-4">
+                            <div class="text-white fw-bold">#{{ order.order_no }}</div>
+                            <div class="text-primary font-monospace x-small">ID: {{ order.id }}</div>
+                        </td>
+                        
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-primary bg-opacity-20 text-primary d-flex align-items-center justify-content-center fw-bold me-2" style="width: 32px; height: 32px; font-size: 0.75rem; border: 1px solid rgba(13, 110, 253, 0.2);">
+                                    {{ order.customer_name[0]|upper }}
+                                </div>
+                                <span class="text-white fw-medium">{{ order.customer_name }}</span>
+                            </div>
+                        </td>
+
+                        <td class="text-white-50 font-monospace small" style="color: #cbd5e1 !important;">
+                            {{ order.phone }}
+                        </td>
+
+                        <td class="text-center">
+                            {% if order.status == 'completed' %}
+                                <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Completed
+                                </span>
+                            {% elif order.status == 'processing' %}
+                                <span class="badge rounded-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3 py-2">
+                                    <i class="bi bi-gear-fill me-1"></i> Processing
+                                </span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-3 py-2">
+                                    <i class="bi bi-clock-history me-1"></i> Pending
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-white opacity-75 small">
+                            {{ order.created_at.strftime('%d %b %Y') if order.created_at else 'N/A' }}
+                        </td>
+
+                        <td class="pe-4 text-end">
+                            <a href="{{ url_for('admin_order_detail', oid=order.id) }}" class="btn btn-outline-light btn-sm px-3 fw-bold border-secondary-subtle">
+                                <i class="bi bi-eye me-1"></i> Manage
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="text-white opacity-25 py-5">
+                                <i class="bi bi-inbox display-4 mb-3 d-block"></i>
+                                <p class="fs-5">No customer orders found in registry.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ERP Grid Styles */
+    .x-small { font-size: 0.7rem; }
+    
+    .erp-search {
+        background-color: #000 !important;
+        border: 1px solid #374151 !important;
+        color: #fff !important;
+        max-width: 200px;
+    }
+
+    .table-dark {
+        --bs-table-bg: transparent;
+        --bs-table-hover-bg: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Brighter Text Overrides */
+    .table-dark tbody td {
+        color: #f1f5f9; /* Near white for maximum readability */
+    }
+
+    .table-dark thead th {
+        color: #94a3b8 !important; /* Muted but bright enough for headers */
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
+
+    .btn-outline-light {
+        color: #ffffff;
+        background: transparent;
+    }
+
+    .btn-outline-light:hover {
+        background: #1e293b;
+        color: #3b82f6;
+        border-color: #3b82f6;
+    }
+
+    .badge {
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+</style>
+{% endblock %}

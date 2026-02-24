@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice {{ order.order_no }}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f7f9; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="100%" style="max-width: 650px; margin: 20px auto; background-color: #ffffff; border: 1px solid #e1e8ed; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        
+        <tr>
+            <td style="padding: 40px 40px 20px 40px; background-color: #111827;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td>
+                            <h1 style="margin: 0; color: #ffffff; font-size: 24px; letter-spacing: 1px; text-transform: uppercase;">Order Receipt</h1>
+                            <p style="margin: 5px 0 0 0; color: #3b82f6; font-family: monospace; font-size: 14px;">#{{ order.order_no }}</p>
+                        </td>
+                        <td align="right" style="vertical-align: top;">
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-transform: uppercase; font-weight: bold;">Date Issued</p>
+                            <p style="margin: 0; color: #ffffff; font-size: 14px;">{{ order.created_at.strftime('%d %b %Y') }}</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="padding: 30px 40px; border-bottom: 1px solid #edf2f7;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td width="55%" style="vertical-align: top;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Billed To:</p>
+                            <p style="margin: 0; color: #1f2937; font-size: 16px; font-weight: 700;">{{ order.customer_name }}</p>
+                            <p style="margin: 4px 0; color: #4b5563; font-size: 14px; line-height: 1.5;">
+                                {{ order.address }}<br>
+                                {{ order.phone }}
+                            </p>
+                        </td>
+                        <td width="45%" align="right" style="vertical-align: top;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Current Status:</p>
+                            <p style="margin: 0; font-size: 14px; color: #111827;">
+                                <span style="background-color: #eff6ff; color: #1e40af; padding: 4px 12px; border-radius: 20px; font-weight: bold; text-transform: uppercase; font-size: 11px; border: 1px solid #dbeafe;">
+                                    {{ order.status }}
+                                </span>
+                            </p>
+                            <p style="margin: 15px 0 0 0; color: #6b7280; font-size: 12px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">Payment Method:</p>
+                            <p style="margin: 0; color: #4b5563; font-size: 14px;">{{ order.payment_method }}</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td align="center" style="padding: 20px 40px;">
+                <a href="{{ url_for('track_order', order_id=order.order_no, _external=True) }}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; padding: 12px 25px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);">
+                    📦 Track Your Order Real-Time
+                </a>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="padding: 10px 40px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th align="left" style="padding: 12px 0; border-bottom: 2px solid #111827; color: #111827; font-size: 13px; text-transform: uppercase;">Items</th>
+                            <th align="center" style="padding: 12px 0; border-bottom: 2px solid #111827; color: #111827; font-size: 13px; text-transform: uppercase;">Qty</th>
+                            <th align="right" style="padding: 12px 0; border-bottom: 2px solid #111827; color: #111827; font-size: 13px; text-transform: uppercase;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td style="padding: 15px 0; border-bottom: 1px solid #edf2f7;">
+                                <p style="margin: 0; color: #1f2937; font-size: 14px; font-weight: bold;">{{ item.product_name }}</p>
+                                <p style="margin: 2px 0 0 0; color: #9ca3af; font-size: 11px;">RM {{ "{:,.2f}".format(item.price) }}</p>
+                            </td>
+                            <td align="center" style="padding: 15px 0; border-bottom: 1px solid #edf2f7; color: #4b5563; font-size: 14px;">{{ item.qty }}</td>
+                            <td align="right" style="padding: 15px 0; border-bottom: 1px solid #edf2f7; color: #1f2937; font-size: 14px; font-weight: bold;">RM {{ "{:,.2f}".format(item.price * item.qty) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="padding: 20px 40px 40px 40px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td width="55%"></td>
+                        <td width="45%" style="background-color: #f9fafb; padding: 20px; border-radius: 8px;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td style="color: #6b7280; font-size: 14px; padding-bottom: 10px;">Order Total</td>
+                                    <td align="right" style="color: #1f2937; font-size: 14px; padding-bottom: 10px; font-weight: bold;">RM {{ "{:,.2f}".format(total) }}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr>
+            <td align="center" style="padding: 0 40px 40px 40px; color: #9ca3af; font-size: 12px; line-height: 1.5;">
+                <p style="margin: 0;">This invoice was generated based on your latest order status. Please use the tracking link above for live logistics updates.</p>
+                <div style="margin-top: 20px; border-top: 1px solid #edf2f7; padding-top: 20px;">
+                    <strong>AdrinNiaga.my</strong><br>
+                    Kuala Lumpur, Malaysia
+                </div>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

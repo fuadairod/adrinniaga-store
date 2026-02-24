@@ -1,0 +1,161 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Product Catalog{% endblock %}
+
+{% block breadcrumb %}
+    <span class="text-white opacity-75">Inventory</span> 
+    <span class="mx-2 text-white opacity-50">/</span> 
+    <span class="text-white fw-medium">Product_Catalog</span>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h3 class="fw-bold text-white mb-1">Product Catalog</h3>
+            <p class="text-white opacity-75 small mb-0">Manage your store's digital inventory and stock availability.</p>
+        </div>
+        <a href="{{ url_for('admin_add_product') }}" class="btn btn-primary px-4 fw-bold shadow">
+            <i class="bi bi-plus-circle me-2"></i> Add New Product
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm overflow-hidden" style="background: #111827; border: 1px solid #1f2937 !important;">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead class="bg-black text-white small">
+                    <tr>
+                        <th class="ps-4 py-3" style="width: 80px;">Image</th>
+                        <th class="py-3">Product Details</th>
+                        <th class="py-3">Price</th>
+                        <th class="py-3">Inventory</th>
+                        <th class="pe-4 py-3 text-end">Management</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    {% for product in products %}
+                    <tr style="border-bottom: 1px solid #1f2937;">
+                        <td class="ps-4">
+                            {% if product.image %}
+                                <img src="{{ url_for('static', filename='uploads/products/' + product.image) }}" 
+                                     class="rounded-2 border border-secondary border-opacity-25 shadow-sm" 
+                                     style="width: 50px; height: 50px; object-fit: cover; background: #000;">
+                            {% else %}
+                                <div class="rounded-2 border border-secondary border-opacity-25 d-flex align-items-center justify-content-center text-white-50" 
+                                     style="width: 50px; height: 50px; background: #000;">
+                                    <i class="bi bi-image small"></i>
+                                </div>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="text-white fw-bold mb-0">{{ product.name }}</div>
+                            <div class="text-white opacity-50 x-small text-truncate" style="max-width: 250px;">
+                                {{ product.description }}
+                            </div>
+                        </td>
+
+                        <td class="text-white fw-semibold">
+                            RM {{ "{:,.2f}".format(product.price) }}
+                        </td>
+
+                        <td>
+                            {% if product.stock <= 5 %}
+                                <div class="d-inline-flex align-items-center text-danger fw-bold small">
+                                    <span class="pulse-red me-2"></span>
+                                    {{ product.stock }} <span class="ms-1 fw-normal opacity-75 text-white">Left</span>
+                                </div>
+                            {% else %}
+                                <div class="text-white">
+                                    <span class="fw-bold">{{ product.stock }}</span> 
+                                    <span class="text-white opacity-50 small ms-1">Units</span>
+                                </div>
+                            {% endif %}
+                        </td>
+
+                        <td class="pe-4 text-end">
+                            <div class="btn-group shadow-sm">
+                                <a href="{{ url_for('admin_add_inventory', pid=product.id) }}" 
+                                   class="btn btn-black-erp btn-sm" title="Add Inventory">
+                                    <i class="bi bi-box-seam text-info"></i>
+                                </a>
+                                <a href="{{ url_for('admin_edit_product', pid=product.id) }}" 
+                                   class="btn btn-black-erp btn-sm" title="Edit">
+                                    <i class="bi bi-pencil-square text-warning"></i>
+                                </a>
+                                <form action="{{ url_for('admin_delete_product', pid=product.id) }}" method="POST" class="d-inline">
+                                    <button class="btn btn-black-erp btn-sm rounded-end" 
+                                            onclick="return confirm('Permanently delete {{ product.name }}?');" 
+                                            title="Delete">
+                                        <i class="bi bi-trash3 text-danger"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="text-white opacity-25 py-5">
+                                <i class="bi bi-cart-x display-4 mb-3 d-block"></i>
+                                <p class="fs-5">No products available in the catalog.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .x-small { font-size: 0.75rem; }
+    
+    .table-dark {
+        --bs-table-bg: transparent;
+        --bs-table-hover-bg: rgba(255, 255, 255, 0.02);
+    }
+
+    .table-dark thead th {
+        color: #94a3b8 !important;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.05em;
+    }
+
+    /* Custom Black Buttons for Actions */
+    .btn-black-erp {
+        background: #000;
+        border: 1px solid #374151;
+        padding: 0.4rem 0.7rem;
+        transition: all 0.2s;
+    }
+    .btn-black-erp:hover {
+        background: #1f2937;
+        border-color: #4b5563;
+    }
+
+    /* Low Stock Animation */
+    .pulse-red {
+        width: 8px;
+        height: 8px;
+        background-color: #ef4444;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 0 rgba(239, 68, 68, 0.4);
+        animation: pulse-red 2s infinite;
+    }
+    @keyframes pulse-red {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    /* Column Hover Effect */
+    .table-hover tbody tr:hover {
+        background-color: rgba(59, 130, 246, 0.03) !important;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Adrinniaga Shop{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-dark: #0f111a;
+            --surface-dark: #1a1d29;
+            --accent-color: #00d2ff; /* Modern Cyan */
+            --text-main: #ffffff; /* Forced to pure white for maximum clarity */
+            --text-muted: #d1d1d1; /* Light silver instead of dark grey */
+            --glass-bg: rgba(26, 29, 41, 0.95);
+        }
+
+        body { 
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            padding-top: 80px; /* Space for fixed navbar */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden; /* Prevent horizontal scroll on mobile */
+        }
+
+        /* --- RESPONSIVE TYPOGRAPHY --- */
+        html { font-size: 14px; }
+        @media (min-width: 768px) { html { font-size: 16px; } }
+
+        /* Forced White Text for Headings */
+        h1, h2, h3, h4, h5, h6 {
+            color: #ffffff !important;
+            word-wrap: break-word;
+        }
+
+        /* Modern Navbar */
+        .navbar {
+            background-color: var(--glass-bg) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 0;
+        }
+
+        .navbar-brand { 
+            font-weight: 800; 
+            letter-spacing: -1px;
+            color: var(--accent-color) !important;
+            text-transform: uppercase;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: #ffffff !important; /* Changed from grey to white */
+            transition: 0.3s;
+            margin: 0 5px;
+            opacity: 0.85;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-color) !important;
+            opacity: 1;
+        }
+
+        /* Cart Badge Neon Glow */
+        .badge.bg-warning {
+            background-color: var(--accent-color) !important;
+            color: #000 !important;
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+        }
+
+        /* Dropdowns */
+        .dropdown-menu {
+            background-color: var(--surface-dark);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .dropdown-item {
+            color: #ffffff; /* Forced white */
+            padding: 10px 20px;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: var(--accent-color);
+        }
+
+        /* Content Container */
+        .main-content {
+            flex: 1;
+            padding-bottom: 40px;
+        }
+
+        /* --- MOBILE NAV FIXES --- */
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                background: var(--surface-dark);
+                margin-top: 15px;
+                padding: 20px;
+                border-radius: 15px;
+                border: 1px solid rgba(255,255,255,0.1);
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+            .nav-item {
+                padding: 5px 0;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+            }
+            .nav-item:last-child { border-bottom: none; }
+            
+            /* Center the login button on mobile */
+            .ms-lg-3 { margin-left: 0 !important; margin-top: 10px; }
+            .btn-outline-light { width: 100%; text-align: center; }
+        }
+
+        /* Modern Flash Alerts */
+        .alert {
+            background-color: var(--surface-dark);
+            border: none;
+            border-left: 4px solid var(--accent-color);
+            color: white !important;
+            border-radius: 12px;
+        }
+
+        /* Footer */
+        footer { 
+            padding: 30px 0; 
+            text-align: center; 
+            background: #000000; /* Pure black footer for depth */
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            color: #ffffff; 
+            font-size: 0.9rem;
+        }
+
+        .text-muted {
+            color: var(--text-muted) !important; /* Forces grey text to light silver */
+        }
+
+        /* Global Table Fix for Dark Theme */
+        .table {
+            color: #ffffff !important;
+        }
+
+        /* Responsive Table Wrapper */
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
+
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+  <div class="container">
+
+    <a class="navbar-brand" href="{{ url_for('store') }}">
+        <i class="fa-solid fa-bolt me-2"></i>Adrinniaga
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav align-items-center">
+
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('store') }}">Shop</a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('track_order') }}">Track Order</a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link position-relative" href="{{ url_for('cart') }}">
+                <i class="fa-solid fa-cart-shopping me-1"></i> Cart
+                {% if session.cart %}
+                    <span class="badge rounded-pill bg-warning text-dark ms-1">
+                        {{ session.cart|length }}
+                    </span>
+                {% endif %}
+            </a>
+        </li>
+
+        {% if session.admin %}
+            <li class="nav-item dropdown ms-lg-3">
+                <a class="nav-link dropdown-toggle btn btn-outline-light px-3 text-white" href="#" data-bs-toggle="dropdown">
+                    Admin Panel
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="{{ url_for('admin_orders') }}"><i class="fa-solid fa-box me-2"></i> Orders</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('admin_products') }}"><i class="fa-solid fa-tags me-2"></i> Products</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('admin_inventory') }}"><i class="fa-solid fa-warehouse me-2"></i> Inventory</a></li>
+                    <li><hr class="dropdown-divider opacity-10"></li>
+                    <li><a class="dropdown-item text-danger" href="{{ url_for('admin_logout') }}"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
+                </ul>
+            </li>
+        {% else %}
+            <li class="nav-item ms-lg-3">
+                <a class="nav-link btn btn-outline-light px-3 text-white" href="{{ url_for('admin_login') }}">Admin Login</a>
+            </li>
+        {% endif %}
+
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container main-content">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+            <i class="fa-solid fa-circle-info me-2"></i> {{ msg }}
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</div>
+
+<footer>
+    <div class="container">
+        <p class="mb-0 text-white">&copy; {{ datetime_malaysia.year }} <strong>Adrinniaga</strong>. All rights reserved.</p>
+        <small class="text-white opacity-50">Premium Shopping Experience</small>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

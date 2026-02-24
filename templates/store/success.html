@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Order Success - Adrinniaga{% endblock %}
+
+{% block content %}
+<div class="text-center mt-5">
+    <h2>Thank you for your order!</h2>
+    <p>Your order has been successfully placed.</p>
+    <h4 class="text-success">{{ order.order_no }}</h4>
+    <a href="{{ url_for('store') }}" class="btn btn-primary mt-3">Back to Shop</a>
+</div>
+{% endblock %}

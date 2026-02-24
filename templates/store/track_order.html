@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Track Order - Adrinniaga{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Tracking Page Specifics */
+    .tracking-card {
+        background: var(--surface-dark);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    .order-details-card {
+        background: var(--surface-dark); /* Forced to match theme */
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-top: 20px;
+    }
+
+    .search-input {
+        background: #0f111a !important;
+        border: 2px solid #333 !important;
+        color: #fff !important;
+        border-radius: 12px 0 0 12px !important;
+        padding: 12px;
+        height: 55px;
+    }
+
+    .search-input:focus {
+        border-color: var(--accent-color) !important;
+        box-shadow: none;
+    }
+
+    .btn-search {
+        background: var(--accent-color);
+        color: #000;
+        font-weight: 700;
+        border: none;
+        border-radius: 0 12px 12px 0;
+        padding: 0 25px;
+        height: 55px;
+        transition: 0.3s;
+    }
+
+    .btn-search:hover {
+        background: #00b8e6;
+        color: #000;
+    }
+
+    /* Fix Table "White" Area */
+    .table {
+        color: #e0e0e0 !important;
+        border-color: rgba(255, 255, 255, 0.05) !important;
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background: rgba(255, 255, 255, 0.03) !important;
+        color: var(--accent-color) !important;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        padding: 15px;
+    }
+
+    .table tbody td {
+        background: transparent !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        padding: 15px;
+    }
+
+    /* Badges */
+    .badge {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-pending { background: rgba(255, 193, 7, 0.15) !important; color: #ffc107 !important; border: 1px solid rgba(255, 193, 7, 0.3); }
+    .status-processing { background: rgba(13, 202, 240, 0.15) !important; color: #0dcaf0 !important; border: 1px solid rgba(13, 202, 240, 0.3); }
+    .status-shipped { background: rgba(0, 210, 255, 0.15) !important; color: var(--accent-color) !important; border: 1px solid rgba(0, 210, 255, 0.3); }
+    .status-completed { background: rgba(25, 135, 84, 0.15) !important; color: #00ff88 !important; border: 1px solid rgba(25, 135, 84, 0.3); }
+
+    .order-no-display {
+        font-family: 'Monaco', 'Consolas', monospace;
+        color: var(--accent-color);
+        font-size: 1.3rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    .summary-header {
+        background: rgba(255, 255, 255, 0.03);
+        padding: 20px 25px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-7 text-center">
+            <div class="tracking-card">
+                <div class="mb-3">
+                    <i class="fa-solid fa-truck-fast fa-3x" style="color: var(--accent-color); opacity: 0.8;"></i>
+                </div>
+                <h2 class="fw-bold mb-2 text-white">Track Your <span style="color: var(--accent-color);">Order</span></h2>
+                <p class="text-muted mb-4">Check your shipment progress in real-time.</p>
+
+                <form method="POST">
+                    <div class="input-group">
+                        <input type="text" name="order_no" class="form-control search-input text-center" 
+                               placeholder="e.g 20260215-0001" required value="{{ request.form.get('order_no', '') }}">
+                        <button class="btn btn-search px-4">
+                            <i class="fa-solid fa-magnifying-glass me-2"></i>Find Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% if order %}
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="order-details-card">
+                <div class="summary-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold text-white"><i class="fa-solid fa-receipt me-2 text-info"></i>Order Summary</h5>
+                    <span class="text-muted small">ID: #{{ order.id }}</span>
+                </div>
+                
+                <div class="p-4">
+                    <div class="row mb-5 align-items-center">
+                        <div class="col-sm-6 mb-3 mb-sm-0">
+                            <label class="text-muted small text-uppercase fw-bold d-block mb-1">Order Number</label>
+                            <span class="order-no-display">{{ order.order_no }}</span>
+                        </div>
+                        <div class="col-sm-6 text-sm-end">
+                            <label class="text-muted small text-uppercase fw-bold d-block mb-2">Tracking Status</label>
+                            {% if order.status == "pending" %}
+                                <span class="badge status-pending">Pending</span>
+                            {% elif order.status == "processing" %}
+                                <span class="badge status-processing">Processing</span>
+                            {% elif order.status == "shipped" %}
+                                <span class="badge status-shipped">Shipped</span>
+                            {% elif order.status == "completed" %}
+                                <span class="badge status-completed">Completed</span>
+                            {% else %}
+                                <span class="badge bg-secondary text-white">{{ order.status }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <h6 class="text-white mb-3 fw-bold"><i class="fa-solid fa-list-ul me-2"></i>Ordered Items</h6>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Item Name</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td class="text-white">{{ item.product_name }}</td>
+                                    <td class="text-center text-white">{{ item.qty }}</td>
+                                    <td class="text-end text-muted">RM {{ '%.2f'|format(item.price) }}</td>
+                                    <td class="text-end text-white fw-bold">RM {{ '%.2f'|format(item.qty * item.price) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-top border-secondary border-opacity-10 d-flex justify-content-between align-items-center">
+                        <div class="text-muted small">
+                            <i class="fa-solid fa-circle-info me-1"></i> Status updated at {{ order.created_at.strftime('%d %b %Y') }}
+                        </div>
+                        <div class="text-end">
+                            <span class="text-muted me-2">Grand Total:</span>
+                            <span class="h2 fw-bold" style="color: var(--accent-color);">RM {{ '%.2f'|format(order_total(order.id)) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

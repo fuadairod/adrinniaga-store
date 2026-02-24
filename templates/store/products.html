@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Shop - Adrinniaga{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Compact Utility Bar */
+    .shop-utility-bar {
+        background: var(--surface-dark);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 20px;
+    }
+
+    .search-control {
+        background: #0f111a !important;
+        border: 1px solid #333 !important;
+        color: #fff !important;
+        border-radius: 8px !important;
+        height: 38px;
+        font-size: 0.85rem;
+    }
+
+    /* Shopee/Lazada Style Grid */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 8px; /* Even tighter for mobile */
+    }
+
+    @media (min-width: 768px) {
+        .product-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+    }
+
+    @media (min-width: 1200px) {
+        .product-grid {
+            grid-template-columns: repeat(5, 1fr); /* 5 items on desktop for that pro look */
+        }
+    }
+
+    /* Compact Product Card */
+    .product-card {
+        background: var(--surface-dark);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.15s ease-in-out;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+    }
+
+    .product-card:active { transform: scale(0.96); }
+
+    .img-container {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        background: #1a1d29;
+        position: relative;
+    }
+
+    .card-img-top {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .card-body {
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .product-title {
+        font-size: 0.8rem;
+        color: #efefef;
+        line-height: 1.3;
+        height: 2.6em; 
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        margin-bottom: 4px;
+        text-decoration: none;
+    }
+
+    .price-tag {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--accent-color);
+    }
+
+    .stock-label {
+        font-size: 0.6rem;
+        color: #777;
+        margin-top: 2px;
+    }
+
+    /* Sold Out Overlay */
+    .sold-out-badge {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: bold;
+        z-index: 2;
+    }
+
+    .btn-view-compact {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid #333;
+        color: #aaa;
+        font-size: 0.65rem;
+        padding: 5px;
+        border-radius: 4px;
+        text-align: center;
+        text-decoration: none;
+        margin-top: 8px;
+        display: block;
+        transition: 0.2s;
+    }
+
+    .btn-view-compact:hover {
+        border-color: var(--accent-color);
+        color: var(--accent-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-2">
+    <div class="mb-3">
+        <h5 class="fw-bold text-white mb-0">Marketplace</h5>
+    </div>
+
+    <div class="shop-utility-bar">
+        <form method="GET" action="{{ url_for('store') }}">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control search-control" 
+                       placeholder="Search products..." value="{{ search_query or '' }}">
+                <button class="btn btn-sm px-3" type="submit" 
+                        style="background: var(--accent-color); color: #000; font-weight: bold;">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="product-grid">
+        {% if products %}
+            {% for product in products %}
+            <div class="product-card">
+                {% if product.stock <= 0 %}
+                <div class="sold-out-badge">SOLD OUT</div>
+                {% endif %}
+
+                <a href="{{ url_for('product_detail', pid=product.id) }}" class="img-container">
+                    {% if product.image %}
+                    <img src="{{ url_for('static', filename='uploads/products/' + product.image) }}" 
+                         class="card-img-top {% if product.stock <= 0 %}opacity-25{% endif %}" alt="Product Image">
+                    {% else %}
+                    <div class="h-100 d-flex align-items-center justify-content-center text-muted">
+                        <i class="fa-solid fa-box fa-2x"></i>
+                    </div>
+                    {% endif %}
+                </a>
+
+                <div class="card-body">
+                    <a href="{{ url_for('product_detail', pid=product.id) }}" class="product-title">
+                        {{ product.name }}
+                    </a>
+                    
+                    <div class="mt-auto">
+                        <div class="price-tag">RM {{ "%.2f"|format(product.price) }}</div>
+                        <div class="stock-label">
+                            {% if product.stock > 0 %}
+                                {{ product.stock }} pieces left
+                            {% else %}
+                                Out of stock
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('product_detail', pid=product.id) }}" class="btn-view-compact">
+                            DETAILS
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <i class="fa-solid fa-ghost fa-3x text-muted opacity-25 mb-3"></i>
+                <p class="text-muted">No items found</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

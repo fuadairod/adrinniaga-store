@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} - Adrinniaga{% endblock %}
+
+{% block extra_head %}
+<style>
+    .product-detail-container {
+        margin-top: 20px;
+        background: var(--surface-dark);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .product-image-section {
+        background: linear-gradient(135deg, #1a1d29 0%, #0f111a 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 400px;
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .product-image-section { 
+            min-height: 300px; 
+            border-right: none; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+        }
+        .product-title { font-size: 1.8rem !important; }
+        .price-tag { font-size: 2rem !important; }
+    }
+
+    .product-main-img {
+        max-width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+        filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+        transition: transform 0.5s ease;
+    }
+
+    .info-section { padding: 30px; }
+
+    @media (min-width: 992px) { .info-section { padding: 50px; } }
+
+    .product-category {
+        color: var(--accent-color);
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .product-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 15px;
+        line-height: 1.2;
+    }
+
+    .product-description {
+        color: #b0b0b0;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 25px;
+    }
+
+    .price-tag {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: baseline;
+    }
+
+    .price-tag span {
+        font-size: 1.1rem;
+        color: var(--accent-color);
+        margin-right: 8px;
+    }
+
+    .qty-selector {
+        background: #0f111a !important;
+        border: 1px solid #333 !important;
+        color: #fff !important;
+        border-radius: 12px;
+        padding: 12px;
+        width: 100%; /* Full width on mobile by default */
+    }
+
+    @media (min-width: 576px) { .qty-selector { width: 120px; } }
+
+    .btn-add-cart {
+        background: var(--accent-color);
+        color: #000;
+        font-weight: 700;
+        border: none;
+        padding: 16px 30px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        flex-grow: 1;
+    }
+
+    .btn-add-cart:hover:not(:disabled) {
+        background: #00b8e6;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 210, 255, 0.3);
+    }
+
+    .btn-back {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #fff;
+        padding: 16px 20px;
+        border-radius: 12px;
+        transition: 0.3s;
+    }
+
+    .btn-back:hover { color: var(--accent-color); background: rgba(255,255,255,0.1); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="product-detail-container">
+        <div class="row g-0">
+            <div class="col-md-5 product-image-section">
+                {% if product.image %}
+                    <img src="{{ url_for('static', filename='uploads/products/' ~ product.image) }}" 
+                         alt="{{ product.name }}" class="product-main-img">
+                {% else %}
+                    <div class="text-center opacity-25">
+                        <i class="fa-solid fa-box-open fa-4x d-block mb-2"></i>
+                        <span class="small text-uppercase">No Image</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-7 info-section">
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <span class="product-category">Adrinniaga Premium</span>
+                </nav>
+                
+                <h1 class="product-title">{{ product.name }}</h1>
+                
+                <div class="mb-3">
+                    {% if product.stock > 5 %}
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
+                            <i class="fa-solid fa-check-circle me-1"></i> In Stock
+                        </span>
+                    {% elif product.stock > 0 %}
+                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-2 rounded-pill">
+                            <i class="fa-solid fa-bolt me-1"></i> Only {{ product.stock }} left
+                        </span>
+                    {% else %}
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill">
+                            <i class="fa-solid fa-times-circle me-1"></i> Sold Out
+                        </span>
+                    {% endif %}
+                </div>
+                
+                <p class="product-description">{{ product.description }}</p>
+
+                <div class="price-tag">
+                    <span>RM</span> {{ '%.2f'|format(product.price) }}
+                </div>
+
+                <form method="POST">
+                    <div class="row g-3">
+                        {% if product.stock > 0 %}
+                        <div class="col-12 col-sm-auto">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Qty</label>
+                            <input type="number" class="form-control qty-selector" name="qty" value="1" min="1" max="{{ product.stock }}">
+                        </div>
+                        {% endif %}
+
+                        <div class="col-12 col-sm d-flex align-items-end gap-2">
+                            <button type="submit" class="btn btn-add-cart w-100" {% if product.stock <= 0 %}disabled{% endif %}>
+                                <i class="fa-solid fa-cart-plus me-2"></i> 
+                                {% if product.stock > 0 %}Add to Cart{% else %}Out of Stock{% endif %}
+                            </button>
+                            <a href="{{ url_for('store') }}" class="btn btn-back">
+                                <i class="fa-solid fa-arrow-left"></i>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="mt-5 pt-4 border-top border-secondary-subtle">
+                    <div class="row g-3">
+                        <div class="col-6 col-md-auto text-muted small">
+                            <i class="fa-solid fa-shield-halved text-info me-1"></i> Secure Payment
+                        </div>
+                        <div class="col-6 col-md-auto text-muted small">
+                            <i class="fa-solid fa-truck-fast text-info me-1"></i> Fast Shipping
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

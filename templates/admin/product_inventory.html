@@ -1,0 +1,117 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Adjust Stock - {{ product.name }}{% endblock %}
+
+{% block breadcrumb %}
+    <a href="{{ url_for('admin_products') }}" class="text-decoration-none text-white opacity-75">Catalog</a> 
+    <span class="mx-2 text-white opacity-50">/</span> 
+    <span class="text-white fw-medium">Inventory_Adjustment</span>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center pt-md-4">
+    <div class="col-12 col-md-8 col-lg-6">
+        
+        <div class="mb-4">
+            <h3 class="fw-bold text-white mb-1">Update Stock Levels</h3>
+            <p class="text-white opacity-75 small mb-0">Manually adjusting inventory for product entity: <span class="text-info font-monospace fw-bold">{{ product.name }}</span></p>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4" style="background: #111827; border: 1px solid #1f2937 !important;">
+            <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <label class="text-white-50 small fw-bold text-uppercase d-block mb-1" style="letter-spacing: 0.5px;">Current Availability</label>
+                    <div class="h2 text-white fw-black mb-0">{{ product.stock }} <small class="text-white-50 fs-6 fw-normal">Units</small></div>
+                </div>
+                <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                    <i class="bi bi-box-seam text-primary fs-3"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm overflow-hidden" style="background: #111827; border: 1px solid #1f2937 !important;">
+            <div class="card-header bg-transparent border-bottom border-secondary-subtle py-3 px-4">
+                <h6 class="text-white mb-0 fw-bold"><i class="bi bi-plus-lg me-2 text-success"></i>Stock Inflow</h6>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <form method="POST">
+                    <div class="mb-4 text-center">
+                        <label for="added_stock" class="form-label text-white fw-bold mb-3 d-block">Quantity to Add</label>
+                        <div class="d-flex justify-content-center">
+                            <input type="number" 
+                                   class="form-control erp-input-large text-center" 
+                                   id="added_stock" 
+                                   name="added_stock" 
+                                   min="1" 
+                                   placeholder="0"
+                                   required 
+                                   style="max-width: 200px;">
+                        </div>
+                        <p class="text-white-50 small mt-3">Enter the amount of new stock arriving at the warehouse.</p>
+                    </div>
+
+                    <div class="d-grid gap-2 pt-2">
+                        <button type="submit" class="btn btn-success fw-bold py-2 shadow-sm">
+                            <i class="bi bi-arrow-up-circle me-1"></i> Finalize Stock Increase
+                        </button>
+                        <a href="{{ url_for('admin_products') }}" class="btn btn-outline-light btn-sm text-white-50 border-secondary-subtle mt-2">
+                            Cancel and Return
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="mt-4 p-3 rounded-3 border-start border-3 border-info" style="background: rgba(13, 110, 253, 0.05);">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-info-circle text-info me-3 fs-5"></i>
+                <p class="text-white opacity-75 small mb-0">
+                    This action will be logged in the <strong>Stock Ledger</strong> under your administrator account.
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .fw-black { font-weight: 900; }
+    
+    /* Brighter Text Overrides */
+    .text-white-50 { color: #f1f5f9 !important; opacity: 0.75; }
+
+    /* Centered Large Input */
+    .erp-input-large {
+        background-color: #000 !important;
+        border: 2px solid #374151 !important;
+        color: #ffffff !important;
+        font-size: 2.5rem !important;
+        font-weight: 700 !important;
+        border-radius: 12px !important;
+        padding: 1rem !important;
+    }
+
+    .erp-input-large:focus {
+        border-color: #198754 !important; /* Green for "Add" */
+        box-shadow: 0 0 0 4px rgba(25, 135, 84, 0.2) !important;
+        outline: none;
+    }
+
+    /* Remove Arrows from Number Input */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .btn-success {
+        background-color: #198754;
+        border: none;
+        transition: transform 0.2s, background-color 0.2s;
+    }
+
+    .btn-success:hover {
+        background-color: #157347;
+        transform: translateY(-1px);
+    }
+</style>
+{% endblock %}
