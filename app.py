@@ -585,23 +585,25 @@ def track_order():
     )
 
 
-def init_db():
-    with app.app_context():
-        db.create_all()
+# ---------------- INIT DATABASE ----------------
+@app.before_first_request
+def create_tables():
+    db.create_all()
 
-        if not Admin.query.first():
-            admin = Admin(username="admin", password=generate_password_hash("admin123"))
-            db.session.add(admin)
-            db.session.commit()
+    # create default admin kalau takde
+    if not Admin.query.first():
+        admin = Admin(username="admin", password=generate_password_hash("admin123"))
+        db.session.add(admin)
+        db.session.commit()
 
-        if not Product.query.first():
-            db.session.add(Product(name="Produk A", description="Contoh A", price=10, stock=5))
-            db.session.add(Product(name="Produk B", description="Contoh B", price=25, stock=2))
-            db.session.commit()
+    # create sample product kalau takde
+    if not Product.query.first():
+        db.session.add(Product(name="Produk A", description="Contoh A", price=10, stock=5))
+        db.session.add(Product(name="Produk B", description="Contoh B", price=25, stock=2))
+        db.session.commit()
 
 
 
 if __name__ == "__main__":
-    init_db()
     app.run(host="0.0.0.0", port=5000)
 
