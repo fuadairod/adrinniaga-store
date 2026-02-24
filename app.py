@@ -586,24 +586,26 @@ def track_order():
 
 
 # ---------------- INIT DATABASE ----------------
-@app.before_first_request
-def create_tables():
+def init_db():
     db.create_all()
 
-    # create default admin kalau takde
     if not Admin.query.first():
         admin = Admin(username="admin", password=generate_password_hash("admin123"))
         db.session.add(admin)
         db.session.commit()
 
-    # create sample product kalau takde
     if not Product.query.first():
         db.session.add(Product(name="Produk A", description="Contoh A", price=10, stock=5))
         db.session.add(Product(name="Produk B", description="Contoh B", price=25, stock=2))
         db.session.commit()
 
+# ---------------- CALL INIT_DB SAFELY ----------------
+# Hapus @app.before_first_request
+# Panggil dengan app context supaya compatible dengan Gunicorn / Railway
+with app.app_context():
+    init_db()
 
-
+# ---------------- RUN LOCAL ----------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
 
